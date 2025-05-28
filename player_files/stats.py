@@ -1,6 +1,6 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from typing import ClassVar
-from functools import lru_cache
+
 
 @dataclass
 class SubStats: 
@@ -8,22 +8,21 @@ class SubStats:
     Object for storing and updating substat data 
     """
 
+    name: str = ""
     level: int = 1
     exp: int = 0
     training_zone: str = ""
-    name: str = ""
+    exp_to_next_level: int = 10
 
     def add_exp(self, exp):
         """
         Adds exp to the existing exp attribute
-        Checks if exp has reached past level requirement
         
         Parameters:
         exp (int): total exp to be added to this object
         """
 
         self.exp += exp
-        self.check_and_level_up()
 
     def check_and_level_up(self):
         """
@@ -31,18 +30,23 @@ class SubStats:
         If current exp meets this criteria, increments level and removes exp from the current amount
 
         If substat can still be leveled up with remaining exp, continue in the loop until it can no longer
+
+        Returns:
+        leveled_up (boolean): for if player leveled up or not
         """
+        leveled_up = False
         while True:
-            exp_req = self.compute_exp_requirement(self.level)
-            if self.exp >= exp_req:
-                self.exp -= exp_req
+            if self.exp >= self.exp_to_next_level:
+                self.exp -= self.exp_to_next_level
+                self.exp_to_next_level = self.compute_exp_requirement()
                 self.level += 1
+                leveled_up = True
             else:
                 break
 
-    @staticmethod # allows for the absence of "self" in parameters
-    @lru_cache(maxsize=None) # save computational space for duplicated argument values
-    def compute_exp_requirement(level):
+        return leveled_up
+
+    def compute_exp_requirement(self):
         """
         Computes the exp requirement for a given level
         Formula uses different values for levels 1-99 and levels 100+
@@ -57,8 +61,8 @@ class SubStats:
 
         """
 
-        b = (level - 1) // 100
-        i = (level - 1) % 100
+        b = (self.level - 1) // 100
+        i = (self.level - 1) % 100
         if b == 0:
             start_exp = 10
             end_exp = 50000
@@ -69,20 +73,60 @@ class SubStats:
 
 
 
+class PlayerStat:
+    def __init__(self):
+        self.main_level = 1
+        self.substats = [f.name for f in fields(self) if f.type == SubStats]
+        self.substat_amount = len(self.substats)
+
+        self.main_level_req = self.main_level * self.substat_amount
+        self.total_substat_levels = 0
+
+    @staticmethod
+    def update_total_substat_level(method):
+        def wrapper(self, *args, **kwargs):
+            leveled_up = method(self, *args, **kwargs)
+            if leveled_up:
+                self.total_substat_levels += 1
+            return leveled_up
+        return wrapper
+
+    @update_total_substat_level
+    def train(self, substat_name, exp):
+        """
+        User selects a substat to train, and then the game will add exp to its current amount the substat has
+        Then checks for if that substat can level up
+
+        Parameters:
+        substat_name (str): The name of the substat user is training
+        exp (int): The amount of exp to be added
+        """
+        if substat_name in self.substats:
+            substat_obj = getattr(self, substat_name)
+
+            substat_obj.add_exp(exp)
+            return substat_obj.check_and_level_up()
+
+
+    def main_level_up(self):
+        if self.total_substat_levels >= self.main_level_req:
+            self.main_level += 1
+            self.main_level_req += self.substat_amount
+
 # Objects for storing all data on stats, this includes its level and the data on its substats
 
 @dataclass
-class StrengthStats():
+class StrengthStats(PlayerStat):
     """ 
     Object for storing data on player strength and their individual substats
     """
 
-    strength: int =  1 # base level
+    main_name: str =  "Strength"
     substat_names: ClassVar[list[str]] = [
             "Core Strength",
-            "Upper body",
-            "Grip",
-            "Lower body",
+            "Upper body Strength",
+            "Grip Strength",
+            "Lower body Strength",
         ] # Used for UI display
     
     core_strength: SubStats = field(default_factory=lambda:SubStats(name="Core Strength")) 
@@ -92,11 +136,12 @@ class StrengthStats():
     # field(default_factory=*****) is used to ensure that values dont share mutable defaults
     # Each substat has levels, exp, and a training zone
 
-    
+    def __post_init__(self):
+        super().__init__()
     # Might have more things soon ??
 
 @dataclass
-class SpeedStats():
+class SpeedStats(PlayerStat):
     """ 
     Object for storing data on player speed and their individual substats
     """
@@ -116,11 +161,13 @@ class SpeedStats():
     # field(default_factory=*****) is used to ensure that values dont share mutable defaults
     # Each substat has levels, exp, and a training zone
 
+    def __post_init__(self):
+        super().__init__()
     # Might have more things soon ??
 
 
 @dataclass
-class DurabilityStats():
+class DurabilityStats(PlayerStat):
     """ 
     Object for storing data on player durability and their individual substats
     """
@@ -140,10 +187,12 @@ class DurabilityStats():
     # field(default_factory=*****) is used to ensure that values dont share mutable defaults
     # Each substat has levels, exp, and a training zone
 
+    def __post_init__(self):
+        super().__init__()
     # Might have more things soon ??
 
 @dataclass
-class IntelligenceStats(): 
+class IntelligenceStats(PlayerStat): 
     """ 
     Object for storing data on player intelligence and their individual substats
     """
@@ -163,10 +212,12 @@ class IntelligenceStats():
     # field(default_factory=*****) is used to ensure that values dont share mutable defaults
     # Each substat has levels, exp, and a training zone
 
+    def __post_init__(self):
+        super().__init__()
     # Might have more things soon ??
 
 @dataclass
-class MagicStats():
+class MagicStats(PlayerStat):
     """ 
     Object for storing data on player magic and their individual substats
     """
@@ -184,4 +235,6 @@ class MagicStats():
     # field(default_factory=*****) is used to ensure that values dont share mutable defaults
     # Each substat has levels, exp, and a training zone
 
+    def __post_init__(self):
+        super().__init__()
     # Might have more things soon ??
