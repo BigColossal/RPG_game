@@ -1,10 +1,16 @@
+from tools import error_handling
+
 class BaseUI():
-    def __init__(self):
+    def __init__(self, username):
         self.UI_width = 100
         self.UI_height = 25
         self.UI = [". " * int(self.UI_width / 2) for i in range(self.UI_height)]
         self.add_border()
         self.text_object_names = []
+        self.essential_objs = []
+        self.temp_objs = []
+
+        self.username = username
 
     def render_UI(self):
         for line in self.UI:
@@ -29,3 +35,31 @@ class BaseUI():
     def add_char(self, char, pos):
         x, y = pos[0], pos[1]
         self.UI[y] = self.UI[y][:x] + char + self.UI[y][x + 1:]
+
+    def insert_text(self, name, text, pos, essential=None):
+        x, y = pos[0] + 1, pos[1] + 1
+
+        if x < 0 or y < 0: # check negative case
+            error_handling.check_index_err(x, y, name)
+
+        text_len = len(text)
+
+        if text_len != 0:
+            end_x = x + (text_len - 1)
+            char_index = 0
+            for i in range(x, end_x + 1):
+
+                try:
+                    self.UI[y] = self.UI[y][:i] + text[char_index] + self.UI[y][i + 1:]
+                    char_index += 1
+                except Exception:
+                    error_handling.check_index_err(x, y, name)
+        
+        self.text_object_names.append(name)
+        if essential != None:
+            if essential == True:
+                self.essential_objs.append(name)
+            if essential == False:
+                self.temp_objs.append(name)
+        else:
+            raise Exception("Please input if object #{name} is essential or temporary")
