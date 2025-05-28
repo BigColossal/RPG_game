@@ -85,10 +85,10 @@ class StrengthStats():
             "Lower body",
         ] # Used for UI display
     
-    core_strength: SubStats = field(default_factory=SubStats(name="Core Strength")) 
-    upper_body_strength: SubStats = field(default_factory=SubStats(name="Upper Body Strength"))
-    grip_strength: SubStats = field(default_factory=SubStats(name="Grip Strength"))
-    lower_body_strength: SubStats = field(default_factory=SubStats(name="Lower Body Strength"))
+    core_strength: SubStats = field(default_factory=lambda:SubStats(name="Core Strength")) 
+    upper_body_strength: SubStats = field(default_factory=lambda:SubStats(name="Upper Body Strength"))
+    grip_strength: SubStats = field(default_factory=lambda:SubStats(name="Grip Strength"))
+    lower_body_strength: SubStats = field(default_factory=lambda:SubStats(name="Lower Body Strength"))
     # field(default_factory=*****) is used to ensure that values dont share mutable defaults
     # Each substat has levels, exp, and a training zone
 
@@ -109,10 +109,10 @@ class SpeedStats():
         "Agility",
     ] # Used for UI display
 
-    reaction_time: SubStats = field(default_factory=SubStats(name="Reaction Time"))
-    velocity: SubStats = field(default_factory=SubStats(name="Velocity"))
-    acceleration: SubStats = field(default_factory=SubStats(name="Acceleration"))
-    agility: SubStats = field(default_factory=SubStats(name="Agility"))
+    reaction_time: SubStats = field(default_factory=lambda:SubStats(name="Reaction Time"))
+    velocity: SubStats = field(default_factory=lambda:SubStats(name="Velocity"))
+    acceleration: SubStats = field(default_factory=lambda:SubStats(name="Acceleration"))
+    agility: SubStats = field(default_factory=lambda:SubStats(name="Agility"))
     # field(default_factory=*****) is used to ensure that values dont share mutable defaults
     # Each substat has levels, exp, and a training zone
 
@@ -133,10 +133,10 @@ class DurabilityStats():
         "Toughness",
     ] # Used for UI display
 
-    lung_capacity: SubStats = field(default_factory=SubStats(name="Lung Capacity"))
-    stamina: SubStats = field(default_factory=SubStats(name="Stamina"))
-    regeneration: SubStats = field(default_factory=SubStats(name="Regeneration"))
-    toughness: SubStats = field(default_factory=SubStats(name="Toughness"))
+    lung_capacity: SubStats = field(default_factory=lambda:SubStats(name="Lung Capacity"))
+    stamina: SubStats = field(default_factory=lambda:SubStats(name="Stamina"))
+    regeneration: SubStats = field(default_factory=lambda:SubStats(name="Regeneration"))
+    toughness: SubStats = field(default_factory=lambda:SubStats(name="Toughness"))
     # field(default_factory=*****) is used to ensure that values dont share mutable defaults
     # Each substat has levels, exp, and a training zone
 
@@ -156,10 +156,10 @@ class IntelligenceStats():
         "Problem Solving",
     ] # Used for UI display
 
-    knowledge: SubStats = field(default_factory=SubStats(name="Knowledge"))
-    logic: SubStats = field(default_factory=SubStats(name="Logic"))
-    strategy: SubStats = field(default_factory=SubStats(name="Strategy"))
-    problem_solving: SubStats = field(default_factory=SubStats(name="Problem Solving"))
+    knowledge: SubStats = field(default_factory=lambda:SubStats(name="Knowledge"))
+    logic: SubStats = field(default_factory=lambda:SubStats(name="Logic"))
+    strategy: SubStats = field(default_factory=lambda:SubStats(name="Strategy"))
+    problem_solving: SubStats = field(default_factory=lambda:SubStats(name="Problem Solving"))
     # field(default_factory=*****) is used to ensure that values dont share mutable defaults
     # Each substat has levels, exp, and a training zone
 
@@ -178,9 +178,9 @@ class MagicStats():
         "Magic Resistance",
     ] # Used for UI display
 
-    mana_control: SubStats = field(default_factory=SubStats(name="Mana Control"))
-    spell_power: SubStats = field(default_factory=SubStats(name="Spell Power"))
-    magic_resistance: SubStats = field(default_factory=SubStats(name="Magic Resistance"))
+    mana_control: SubStats = field(default_factory=lambda:SubStats(name="Mana Control"))
+    spell_power: SubStats = field(default_factory=lambda:SubStats(name="Spell Power"))
+    magic_resistance: SubStats = field(default_factory=lambda:SubStats(name="Magic Resistance"))
     # field(default_factory=*****) is used to ensure that values dont share mutable defaults
     # Each substat has levels, exp, and a training zone
 
