@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field, fields
 from typing import ClassVar
+from enum import Enum
 
 """
 Player Stats Module
@@ -21,25 +22,52 @@ Features:
 """
 
 
+class StatClasses(Enum):
+    STRENGTH = "Strength"
+    SPEED = "Speed"
+    DURABILITY = "Durability"
+    INTELLIGENCE = "Intelligence"
+    MAGIC = "Magic"
+
+    def capability_measure_helper(self):
+        return {
+            StatClasses.STRENGTH: "Lb",
+            StatClasses.SPEED: "Kmph",
+            StatClasses.DURABILITY: "Lbf",
+            StatClasses.INTELLIGENCE: "IQ",
+            StatClasses.MAGIC: "MU",
+        }[self]
+
+
 @dataclass
 class SubStats: 
     """
     Represents a substat that can be trained and leveled up over time.
 
     Attributes:
-    name (str): The name of the substat (e.g., Strength, Agility).
+    main_stat (StatClasses): Enum for the 5 different main stats (e.g., Strength, Intelligence)
+    capability_multi (int): Multiplier for how much the substat level affects the substat's capability in terms of either Kmph, Lbs, IQ, etc.
+    measurement (str): The way for measuring the capability of a substat.
+    name (str): The name of the substat (e.g., Core Strength, Agility).
     level (int): The current level of the substat. Defaults to 1.
     exp (int): The current experience points accumulated. Defaults to 0.
     training_zone (str): The name of the training zone where this substat can be improved.
     exp_to_next_level (int): The experience required to reach the next level. Defaults to 10.
     """
 
-    name: str = ""
+    main_stat: StatClasses
+    capability_multi: int
+    measurement: str = field(init=False)
+    name: str
+
     level: int = 1
     exp: int = 0
     training_zone: str = ""
     exp_to_next_level: int = 10
 
+    def __post_init__(self):
+        self.measurement = self.main_stat.capability_measure_helper()
+    
     def add_exp(self, exp: int) -> None:
         """
         Adds experience points to the current substat.
@@ -111,6 +139,15 @@ class SubStats:
 
         # Experience points are generally whole numbers
         return int(exp_req)
+
+    def compute_capability(self) -> int:
+        """
+        
+        """
+        return self.level * self.capability_multi
+
+
+
 
 
 @dataclass
@@ -239,7 +276,7 @@ class StrengthStats(PlayerStat):
         lower_body_strength (SubStats): Substat tracking leg and lower body development.
     """
 
-    main_name: str =  "Strength"
+    main_name: ClassVar[str] =  "Strength"
     tier: str = ""
     substat_display_names: ClassVar[list[str]] = [
             "Core Strength",
@@ -249,10 +286,10 @@ class StrengthStats(PlayerStat):
         ] # Used to show readable names in the UI (kept separate from internal attribute names)
     
     # field(default_factory=*****) is used to ensure that values dont share mutable defaults
-    core_strength: SubStats = field(default_factory=lambda:SubStats(name="Core Strength")) 
-    upper_body_strength: SubStats = field(default_factory=lambda:SubStats(name="Upper Body Strength"))
-    grip_strength: SubStats = field(default_factory=lambda:SubStats(name="Grip Strength"))
-    lower_body_strength: SubStats = field(default_factory=lambda:SubStats(name="Lower Body Strength"))
+    core_strength: SubStats = field(default_factory=lambda:SubStats(name="Core Strength", main_stat=StatClasses.STRENGTH)) 
+    upper_body_strength: SubStats = field(default_factory=lambda:SubStats(name="Upper Body Strength", main_stat=StatClasses.STRENGTH))
+    grip_strength: SubStats = field(default_factory=lambda:SubStats(name="Grip Strength", main_stat=StatClasses.STRENGTH))
+    lower_body_strength: SubStats = field(default_factory=lambda:SubStats(name="Lower Body Strength", main_stat=StatClasses.STRENGTH))
 
     # Might have more things soon ??
 
@@ -273,7 +310,7 @@ class SpeedStats(PlayerStat):
         agility (SubStats): Substat tracking how fluidly and efficiently a player can dodge, maneuver, and change direction.
     """
 
-    main_name: str = "Speed"
+    main_name: ClassVar[str] = "Speed"
     tier: str = ""
     substat_display_names: ClassVar[list[str]] = [
         "Reaction time",
@@ -283,10 +320,10 @@ class SpeedStats(PlayerStat):
     ] # Used to show readable names in the UI (kept separate from internal attribute names)
 
     # field(default_factory=*****) is used to ensure that values dont share mutable defaults
-    reaction_time: SubStats = field(default_factory=lambda:SubStats(name="Reaction Time"))
-    velocity: SubStats = field(default_factory=lambda:SubStats(name="Velocity"))
-    acceleration: SubStats = field(default_factory=lambda:SubStats(name="Acceleration"))
-    agility: SubStats = field(default_factory=lambda:SubStats(name="Agility"))
+    reaction_time: SubStats = field(default_factory=lambda:SubStats(name="Reaction Time", main_stat=StatClasses.SPEED))
+    velocity: SubStats = field(default_factory=lambda:SubStats(name="Velocity", main_stat=StatClasses.SPEED))
+    acceleration: SubStats = field(default_factory=lambda:SubStats(name="Acceleration", main_stat=StatClasses.SPEED))
+    agility: SubStats = field(default_factory=lambda:SubStats(name="Agility", main_stat=StatClasses.SPEED))
 
     # Might have more things soon ??
 
@@ -307,7 +344,7 @@ class DurabilityStats(PlayerStat):
         toughness (SubStats): Substat tracking how tough the body's skin is
     """
 
-    main_name: str = "Durability"
+    main_name: ClassVar[str] = "Durability"
     tier: str = ""
     substat_stat_names: ClassVar[list[str]] = [
         "Lung capacity",
@@ -317,10 +354,10 @@ class DurabilityStats(PlayerStat):
     ] # Used to show readable names in the UI (kept separate from internal attribute names)
 
     # field(default_factory=*****) is used to ensure that values dont share mutable defaults
-    lung_capacity: SubStats = field(default_factory=lambda:SubStats(name="Lung Capacity"))
-    stamina: SubStats = field(default_factory=lambda:SubStats(name="Stamina"))
-    regeneration: SubStats = field(default_factory=lambda:SubStats(name="Regeneration"))
-    toughness: SubStats = field(default_factory=lambda:SubStats(name="Toughness"))
+    lung_capacity: SubStats = field(default_factory=lambda:SubStats(name="Lung Capacity", main_stat=StatClasses.DURABILITY))
+    stamina: SubStats = field(default_factory=lambda:SubStats(name="Stamina", main_stat=StatClasses.DURABILITY))
+    regeneration: SubStats = field(default_factory=lambda:SubStats(name="Regeneration", main_stat=StatClasses.DURABILITY))
+    toughness: SubStats = field(default_factory=lambda:SubStats(name="Toughness", main_stat=StatClasses.DURABILITY))
 
     # Might have more things soon ??
 
@@ -341,7 +378,7 @@ class IntelligenceStats(PlayerStat):
         problem_solving (SubStats): Substat tracking the ability to solve issues with the most optimal solutions
     """
 
-    main_name: str = "Intelligence"
+    main_name: ClassVar[str] = "Intelligence"
     tier: str = ""
     substat_stat_names: ClassVar[list[str]] = [
         "Knowledge",
@@ -351,10 +388,10 @@ class IntelligenceStats(PlayerStat):
     ] # Used to show readable names in the UI (kept separate from internal attribute names)
 
     # field(default_factory=*****) is used to ensure that values dont share mutable defaults
-    knowledge: SubStats = field(default_factory=lambda:SubStats(name="Knowledge"))
-    logic: SubStats = field(default_factory=lambda:SubStats(name="Logic"))
-    strategy: SubStats = field(default_factory=lambda:SubStats(name="Strategy"))
-    problem_solving: SubStats = field(default_factory=lambda:SubStats(name="Problem Solving"))
+    knowledge: SubStats = field(default_factory=lambda:SubStats(name="Knowledge", main_stat=StatClasses.INTELLIGENCE))
+    logic: SubStats = field(default_factory=lambda:SubStats(name="Logic", main_stat=StatClasses.INTELLIGENCE))
+    strategy: SubStats = field(default_factory=lambda:SubStats(name="Strategy", main_stat=StatClasses.INTELLIGENCE))
+    problem_solving: SubStats = field(default_factory=lambda:SubStats(name="Problem Solving", main_stat=StatClasses.INTELLIGENCE))
 
     # Might have more things soon ??
 
@@ -374,7 +411,7 @@ class MagicStats(PlayerStat):
         magic_resistance (SubStats): Substat tracking how well the body reacts to opposing magic spells
     """
 
-    main_name: str = "Magic"
+    main_name: ClassVar[str] = "Magic"
     tier: str = ""
     substat_stat_names: ClassVar[list[str]] = [
         "Mana Control",
@@ -383,8 +420,8 @@ class MagicStats(PlayerStat):
     ] # Used to show readable names in the UI (kept separate from internal attribute names)
 
     # field(default_factory=*****) is used to ensure that values dont share mutable defaults
-    mana_control: SubStats = field(default_factory=lambda:SubStats(name="Mana Control"))
-    spell_power: SubStats = field(default_factory=lambda:SubStats(name="Spell Power"))
-    magic_resistance: SubStats = field(default_factory=lambda:SubStats(name="Magic Resistance"))
+    mana_control: SubStats = field(default_factory=lambda:SubStats(name="Mana Control", main_stat=StatClasses.MAGIC))
+    spell_power: SubStats = field(default_factory=lambda:SubStats(name="Spell Power", main_stat=StatClasses.MAGIC))
+    magic_resistance: SubStats = field(default_factory=lambda:SubStats(name="Magic Resistance", main_stat=StatClasses.MAGIC))
 
     # Might have more things soon ??
