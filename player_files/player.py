@@ -1,6 +1,6 @@
 import tools.error_handling as error_handling
-from stats import StrengthStats, SpeedStats, DurabilityStats, IntelligenceStats, MagicStats
-from player_inventory import PlayerInventory
+from player_files.stats import StrengthStats, SpeedStats, DurabilityStats, IntelligenceStats, MagicStats
+from player_files.player_inventory import PlayerInventory
 from dataclasses import dataclass, field
 
 @dataclass

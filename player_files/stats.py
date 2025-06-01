@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field, fields
 from typing import ClassVar
 from enum import Enum
+from tools.number_utils import round_to_3_leading_digits
 
 """
 Player Stats Module
@@ -56,9 +57,10 @@ class SubStats:
     """
 
     main_stat: StatClasses
-    capability_multi: int
-    measurement: str = field(init=False)
     name: str
+    capability_multi: int = 1
+    measurement: str = field(init=False)
+    capability: str = field(init=False)
 
     level: int = 1
     exp: int = 0
@@ -142,11 +144,13 @@ class SubStats:
 
     def compute_capability(self) -> int:
         """
-        
+        Calculates how strong/fast/smart etc the substat is, and then stores it
+
+        Multiplies the current level of the substat by how much multi it has.
+        all substats have different multis depending on what they are (e.g, upper body 5.5, lower body 7.5)
+
         """
-        return self.level * self.capability_multi
-
-
+        self.capability = self.level * self.capability_multi + " " + self.measurement
 
 
 
@@ -274,6 +278,8 @@ class StrengthStats(PlayerStat):
         upper_body_strength (SubStats): Substat tracking upper body strength (arms, chest, shoulders).
         grip_strength (SubStats): Substat tracking hand and grip endurance/power.
         lower_body_strength (SubStats): Substat tracking leg and lower body development.
+
+        damage (int): Strength influences how much damage a user does
     """
 
     main_name: ClassVar[str] =  "Strength"
@@ -291,8 +297,19 @@ class StrengthStats(PlayerStat):
     grip_strength: SubStats = field(default_factory=lambda:SubStats(name="Grip Strength", main_stat=StatClasses.STRENGTH))
     lower_body_strength: SubStats = field(default_factory=lambda:SubStats(name="Lower Body Strength", main_stat=StatClasses.STRENGTH))
 
-    # Might have more things soon ??
+    damage: int = 5
 
+    def compute_damage(self):
+        if self.main_level < 50:
+            increase_factor = (self.main_level / 5) * 5
+        elif self.main_level < 100:
+            increase_factor = (self.main_level / 5) * 15
+        elif self.main_level >= 100:
+            increase_factor = (self.main_level / 5) * (100 * (((self.main_level - 100) / 75) + 1))
+        
+        self.damage = round_to_3_leading_digits(int(self.damage * 1.1) + increase_factor)
+
+        return self.damage
 
 @dataclass
 class SpeedStats(PlayerStat):
@@ -359,7 +376,25 @@ class DurabilityStats(PlayerStat):
     regeneration: SubStats = field(default_factory=lambda:SubStats(name="Regeneration", main_stat=StatClasses.DURABILITY))
     toughness: SubStats = field(default_factory=lambda:SubStats(name="Toughness", main_stat=StatClasses.DURABILITY))
 
-    # Might have more things soon ??
+    player_health: int = 100
+    player_stamina: int = 100
+    player_regen: int = 5
+
+    def compute_health(self):
+        if self.main_level < 50:
+            increase_factor = (self.main_level / 5) * 15
+        elif self.main_level < 100:
+            increase_factor = (self.main_level / 5) * 50
+        elif self.main_level >= 100:
+            increase_factor = (self.main_level / 5) * (300 * (((self.main_level - 100) / 75) + 1))
+        
+        self.health = round_to_3_leading_digits(int((self.damage * 1.1) + increase_factor))
+
+        return self.health
+    
+    def compute_stamina(self):
+        pass
+
 
 
 @dataclass
