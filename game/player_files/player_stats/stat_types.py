@@ -200,5 +200,5 @@ class MagicStats(PlayerStat):
 
     mana: int = 100
     
-    def compute_mana(self):
+    def compute_mana(self) -> int:
         return self.compute_player_physical_stats("mana", 10, 25, 125)
